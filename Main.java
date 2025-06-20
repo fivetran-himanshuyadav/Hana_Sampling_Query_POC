@@ -6,9 +6,9 @@ import java.io.FileWriter;
 public class Main {
 
     public static void main(String[] args) {
-        String jdbcUrl = "jdbc:sap://54.147.66.43:30215";
-        String username = "SAPABAP1";
-        String password = "HvRS0ftWar3";
+        String jdbcUrl = "";
+        String username = "";
+        String password = "";
         
         Connection connection = null;
         PreparedStatement statement = null;

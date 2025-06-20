@@ -16,3 +16,8 @@
 	[70 - 80]: 43
 	[80 - 90]: 27
 	[90 - 100]: 28
+
+### Conclusion
+1. Query execution time is under limit
+2. But data is not distributed well among buckets.
+3. Most buckets have very less data than expected.

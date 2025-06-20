@@ -1,13 +1,15 @@
 import java.sql.*;
 import java.util.*;
+import java.util.ArrayList;
+import java.io.FileWriter;
 
 public class Main {
 
     public static void main(String[] args) {
-        String jdbcUrl = "";
-        String username = "";
-        String password = "";
-
+        String jdbcUrl = "jdbc:sap://54.147.66.43:30215";
+        String username = "SAPABAP1";
+        String password = "HvRS0ftWar3";
+        
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -61,6 +63,7 @@ public class Main {
 
 
             // Step 2: check PK distribution
+            List<Integer> countValues = new ArrayList<>();
             int count = 1;
             for(Doktl currentDoktl : doktlList) {
                 // get PK lower bound
@@ -163,11 +166,22 @@ public class Main {
                 ResultSet countRs = countStmt.executeQuery();
                 if (countRs.next()) {
                     int countValue = countRs.getInt(1);
+                    countValues.add(countValue);
                     System.out.println(countValue);
                 }
-                
+ 
             }
 
+            // Step 3: aggregate and visualize the results
+
+            try (FileWriter writer = new FileWriter("count_values.csv")) {
+                for (Integer value : countValues) {
+                    writer.write(value + "\n");
+                }
+                System.out.println("Exported count values to count_values.csv");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         }
 

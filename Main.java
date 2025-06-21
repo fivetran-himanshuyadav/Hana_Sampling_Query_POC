@@ -40,7 +40,7 @@ public class Main {
             String sampleQuery = """
                 SELECT DOKVERSION, ID, LANGU, OBJECT, LINE, TYP, 'm' AS dummy_column
                 FROM SAPABAP1.DOKTL
-                TABLESAMPLE BERNOULLI(0.001)
+                TABLESAMPLE SYSTEM(0.001)
                 ORDER BY OBJECT, LINE, DOKVERSION, ID, LANGU, TYP
             """;
             Statement sampleStmt = connection.createStatement();

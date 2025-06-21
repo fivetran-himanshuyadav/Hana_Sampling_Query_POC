@@ -6,7 +6,7 @@
     4. Histogram: Left skewed
 
 
-    Minimum value: 2
+    Bucket Size Count: 2 4876528
 
 ### Conclusion
 1. Query execution time is under limit

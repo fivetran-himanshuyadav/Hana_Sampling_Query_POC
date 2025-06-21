@@ -8,6 +8,11 @@
 
     Bucket Size Count: 2 4876528
 
+### Histogram
+![](./histo_systematic.png)
+
+
+
 ### Conclusion
 1. Query execution time is under limit
 2. Data is poorly distributed from minimum value 2 to maximum value > 1 million

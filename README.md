@@ -17,6 +17,10 @@
 	[80 - 90]: 27
 	[90 - 100]: 28
 
+### Histogram
+![](./histo.png)
+
+
 ### Conclusion
 1. Query execution time is under limit
 2. But data is not distributed well among buckets.

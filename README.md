@@ -7,7 +7,7 @@
 | **System** | ≤ 1 sec | 1241.0 | 226777.97 | 2 - 4876528 | 100K | ✅ Fast | ❌ Bad  |
 | **Row-Wise-Predictate** | ≤ 17 sec, CPU - 500+ |  |  | 11 - | 100K | ❌ Slow | ❌ Bad  |
 | **RowNumber** | NC, CPU - 800+ |  |  |  | 100K | ❌ Very very slow | ✅ Deterministic |
-| **rowId modulo** | 22sec, CPU - 800+ |  |  |  | 100K | ❌ slow | ❌ Bad  |
+| **rowId modulo** | 22sec, CPU - 800+ | 74333.0 | 94134.99 | 8 - 589641  | 100K | ❌ slow | ❌ Bad  |
 
 
 NC: Not Completed

@@ -38,10 +38,11 @@ public class Main {
             // Step 1: Fetch buckets
             long sampleStart = System.currentTimeMillis();
             String sampleQuery = """
-                SELECT DOKVERSION, ID, LANGU, OBJECT, LINE, TYP, 'm' AS dummy_column
-                FROM SAPABAP1.DOKTL
-                TABLESAMPLE BERNOULLI(0.001)
-                ORDER BY DOKVERSION, ID, LANGU, OBJECT, LINE, TYP
+                SELECT * FROM (
+                    SELECT DOKVERSION, ID, LANGU, OBJECT, LINE, TYP
+                    FROM SAPABAP1.DOKTL
+                    WHERE MOD("$rowid$", 100000) = 1
+                ) ORDER BY OBJECT, LINE, DOKVERSION, ID, LANGU, TYP
             """;
             Statement sampleStmt = connection.createStatement();
             ResultSet sampleRs = sampleStmt.executeQuery(sampleQuery);
@@ -93,75 +94,77 @@ public class Main {
                 String nextObject = nextDoktl.getObject();
                 String nextTyp = nextDoktl.getTyp();
 
-
+                // OBJECT, LINE, DOKVERSION, ID, LANGU, TYP
                 // prepare the query to count rows in the range
                 String query = """
                     SELECT COUNT(*)
                     FROM SAPABAP1.DOKTL
                     WHERE
                     (
-                        DOKVERSION > ?
-                        OR (DOKVERSION = ? AND ID > ?)
-                        OR (DOKVERSION = ? AND ID = ? AND LANGU > ?)
-                        OR (DOKVERSION = ? AND ID = ? AND LANGU = ? AND OBJECT > ?)
-                        OR (DOKVERSION = ? AND ID = ? AND LANGU = ? AND OBJECT = ? AND LINE > ?)
-                        OR (DOKVERSION = ? AND ID = ? AND LANGU = ? AND OBJECT = ? AND LINE = ? AND TYP >= ?)
+                        OBJECT > ?
+                        OR (OBJECT = ? AND LINE > ?)
+                        OR (OBJECT = ? AND LINE = ? AND DOKVERSION > ?)
+                        OR (OBJECT = ? AND LINE = ? AND DOKVERSION = ? AND ID > ?)
+                        OR (OBJECT = ? AND LINE = ? AND DOKVERSION = ? AND ID = ? AND LANGU > ?)
+                        OR (OBJECT = ? AND LINE = ? AND DOKVERSION = ? AND ID = ? AND LANGU = ? AND TYP >= ?)
                     )
                     AND
                     (
-                        DOKVERSION < ?
-                        OR (DOKVERSION = ? AND ID < ?)
-                        OR (DOKVERSION = ? AND ID = ? AND LANGU < ?)
-                        OR (DOKVERSION = ? AND ID = ? AND LANGU = ? AND OBJECT < ?)
-                        OR (DOKVERSION = ? AND ID = ? AND LANGU = ? AND OBJECT = ? AND LINE < ?)
-                        OR (DOKVERSION = ? AND ID = ? AND LANGU = ? AND OBJECT = ? AND LINE = ? AND TYP <= ?)
+                        OBJECT < ?
+                        OR (OBJECT = ? AND LINE < ?)
+                        OR (OBJECT = ? AND LINE = ? AND DOKVERSION < ?)
+                        OR (OBJECT = ? AND LINE = ? AND DOKVERSION = ? AND ID < ?)
+                        OR (OBJECT = ? AND LINE = ? AND DOKVERSION = ? AND ID = ? AND LANGU < ?)
+                        OR (OBJECT = ? AND LINE = ? AND DOKVERSION = ? AND ID = ? AND LANGU = ? AND TYP <= ?)
                     )
                 """;
                 PreparedStatement countStmt = connection.prepareStatement(query);
-                // Set parameters for the prepared statement
-                countStmt.setString(1, dokVersion);
-                countStmt.setString(2, dokVersion);
-                countStmt.setString(3, id);
-                countStmt.setString(4, dokVersion);
-                countStmt.setString(5, id);
-                countStmt.setString(6, langu);
-                countStmt.setString(7, dokVersion);
-                countStmt.setString(8, id);
-                countStmt.setString(9, langu);
-                countStmt.setString(10, object);
-                countStmt.setString(11, dokVersion);
-                countStmt.setString(12, id);
-                countStmt.setString(13, langu);
-                countStmt.setString(14, object);
-                countStmt.setString(15, line);
-                countStmt.setString(16, dokVersion);
-                countStmt.setString(17, id);
-                countStmt.setString(18, langu);
-                countStmt.setString(19, object);
-                countStmt.setString(20, line);
-                countStmt.setString(21, typ); 
 
-                countStmt.setString(22, nextDokVersion);
-                countStmt.setString(23, nextDokVersion);
-                countStmt.setString(24, nextId);
-                countStmt.setString(25, nextDokVersion);
-                countStmt.setString(26, nextId);
-                countStmt.setString(27, nextLangu);
-                countStmt.setString(28, nextDokVersion);
-                countStmt.setString(29, nextId);
-                countStmt.setString(30, nextLangu);
-                countStmt.setString(31, nextObject);
-                countStmt.setString(32, nextDokVersion);
-                countStmt.setString(33, nextId);
-                countStmt.setString(34, nextLangu);
-                countStmt.setString(35, nextObject);
-                countStmt.setString(36, nextLine);
-                countStmt.setString(37, nextDokVersion);
-                countStmt.setString(38, nextId);
-                countStmt.setString(39, nextLangu);
-                countStmt.setString(40, nextObject);
-                countStmt.setString(41, nextLine);
-                countStmt.setString(42, nextTyp);
+                // Set parameters for the first composite condition (greater than or equal comparison)
+                countStmt.setString(1, object);         // OBJECT > ?
+                countStmt.setString(2, object);         // OBJECT = ?
+                countStmt.setString(3, line);           // LINE > ?
+                countStmt.setString(4, object);         // OBJECT = ?
+                countStmt.setString(5, line);           // LINE = ?
+                countStmt.setString(6, dokVersion);     // DOKVERSION > ?
+                countStmt.setString(7, object);         // OBJECT = ?
+                countStmt.setString(8, line);           // LINE = ?
+                countStmt.setString(9, dokVersion);     // DOKVERSION = ?
+                countStmt.setString(10, id);            // ID > ?
+                countStmt.setString(11, object);        // OBJECT = ?
+                countStmt.setString(12, line);          // LINE = ?
+                countStmt.setString(13, dokVersion);    // DOKVERSION = ?
+                countStmt.setString(14, id);            // ID = ?
+                countStmt.setString(15, langu);         // LANGU > ?
+                countStmt.setString(16, object);        // OBJECT = ?
+                countStmt.setString(17, line);          // LINE = ?
+                countStmt.setString(18, dokVersion);    // DOKVERSION = ?
+                countStmt.setString(19, id);            // ID = ?
+                countStmt.setString(20, langu);         // LANGU = ?
+                countStmt.setString(21, typ);           // TYP >= ?
+
+                // Set parameters for the second composite condition (less than or equal comparison)
+                countStmt.setString(22, nextObject);        // OBJECT < ?
+                countStmt.setString(23, nextObject);        // OBJECT = ?
+                countStmt.setString(24, nextLine);          // LINE < ?
+                countStmt.setString(25, nextObject);        // OBJECT = ?
+                countStmt.setString(26, nextLine);          // LINE = ?
+                countStmt.setString(27, nextDokVersion);    // DOKVERSION < ?
+                countStmt.setString(28, nextObject);        // OBJECT = ?
+                countStmt.setString(29, nextLine);          // LINE = ?
+                countStmt.setString(30, nextDokVersion);    // DOKVERSION = ?
+                countStmt.setString(31, nextId);            // ID < ?
+                countStmt.setString(32, nextObject);        // OBJECT = ?
+                countStmt.setString(33, nextLine);          // LINE = ?
+                countStmt.setString(34, nextDokVersion);    // DOKVERSION = ?
+                countStmt.setString(35, nextId);            // ID = ?
+                countStmt.setString(36, nextLangu);         // LANGU < ?
+                countStmt.setString(37, nextObject);        // OBJECT = ?
+                countStmt.setString(38, nextLine);          // LINE = ?
+                countStmt.setString(39, nextDokVersion);    // DOKVERSION = ?
+                countStmt.setString(40, nextId);            // ID = ?
+                countStmt.setString(41, nextLangu);         // LANGU = ?
+                countStmt.setString(42, nextTyp);           // TYP <= ?                
 
                 ResultSet countRs = countStmt.executeQuery();
                 if (countRs.next()) {
@@ -186,4 +189,3 @@ public class Main {
         }
 
     }
-
